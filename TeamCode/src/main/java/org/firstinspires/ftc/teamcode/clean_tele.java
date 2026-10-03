@@ -19,10 +19,10 @@ public class clean_tele extends LinearOpMode {
     public void runOpMode() {
 
         // Initialize the hardware map - Motors
-        lf_drive = hardwareMap.get(DcMotor.class, "lf_drive");
-        rf_drive = hardwareMap.get(DcMotor.class, "rf_drive");
-        lb_drive = hardwareMap.get(DcMotor.class, "lb_drive");
-        rb_drive = hardwareMap.get(DcMotor.class, "rb_drive");
+        lf_drive = hardwareMap.get(DcMotor.class, "leftFront");
+        rf_drive = hardwareMap.get(DcMotor.class, "rightFront");
+        lb_drive = hardwareMap.get(DcMotor.class, "leftBack");
+        rb_drive = hardwareMap.get(DcMotor.class, "rightBack");
 
         // Setting the left motors reverse because they are on the opposite side
         lf_drive.setDirection(DcMotor.Direction.REVERSE);
