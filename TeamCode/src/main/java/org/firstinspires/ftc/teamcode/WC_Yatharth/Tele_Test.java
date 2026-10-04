@@ -27,14 +27,11 @@ public class Tele_Test extends LinearOpMode {
     public double servoPosition = 0.0;
     public final double MIN_POSITION = 0.0;
     public final double MAX_POSITION = 1.0;
-    public double positionAdjustment = 0.1;
-    public double servoTargetPosition = 0.5;
+    public double positionAdjustment = 0.01;
     public double GRABBERL_IN_POWER = 1.0;
     public double GRABBERR_IN_POWER = 1.0;
     public double GRABBERL_REST_POWER = 0.0;
     public double GRABBERR_REST_POWER = 0.0;
-    public double LAUNCHER_READY_POSITION = 0.0;
-    public double LAUNCHER_SHOOT_POSITION = 0.5;
 
     // Motor Variables
     public double SHOOTER_SHOOT_POWER = 0.01;
@@ -90,6 +87,8 @@ public class Tele_Test extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+        Launcher.setPosition(servoPosition);
+
         while (opModeIsActive()) {
 
             telemetry.addData("Launcher Position", Launcher.getPosition());
@@ -124,11 +123,20 @@ public class Tele_Test extends LinearOpMode {
             rf_drive.setPower(rfPower);
             rb_drive.setPower(rbPower);
 
-            if (gamepad2.a) {
-                Launcher.setPosition(LAUNCHER_READY_POSITION);
-            } else if (gamepad2.b) {
-                Launcher.setPosition(LAUNCHER_SHOOT_POSITION);
+            // Launcher servo incremental control
+            if (gamepad2.right_stick_y < -0.1) {
+                servoPosition += positionAdjustment;
+            } else if (gamepad2.right_stick_y > 0.1) {
+                servoPosition -= positionAdjustment;
             }
+
+            servoPosition = Range.clip(
+                    servoPosition,
+                    MIN_POSITION,
+                    MAX_POSITION
+            );
+
+            Launcher.setPosition(servoPosition);
 
             if (gamepad2.right_bumper) {
                 Intake.setPower(INTAKE_IN_POWER);
@@ -146,3 +154,4 @@ public class Tele_Test extends LinearOpMode {
         }
     }
 }
+
