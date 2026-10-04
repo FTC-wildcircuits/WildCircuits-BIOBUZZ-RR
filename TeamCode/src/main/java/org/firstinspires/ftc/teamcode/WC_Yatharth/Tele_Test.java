@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Tele-Test", group = "Linear OpMode")
 public class Tele_Test extends LinearOpMode {
@@ -19,9 +19,9 @@ public class Tele_Test extends LinearOpMode {
     private DcMotor rb_drive = null;
     private DcMotor Shooter = null;
     private DcMotor Intake = null;
-    private CRServo  GrabberL = null;
-    private CRServo  GrabberR = null;
-    private Servo  Launcher = null;
+    private CRServo GrabberL = null;
+    private CRServo GrabberR = null;
+    private Servo Launcher = null;
 
     // Servo Variables
     public double servoPosition = 0.0;
@@ -31,12 +31,18 @@ public class Tele_Test extends LinearOpMode {
     public double servoTargetPosition = 0.5;
     public double GRABBERL_IN_POWER = 1.0;
     public double GRABBERR_IN_POWER = 1.0;
+    public double GRABBERL_REST_POWER = 0.0;
+    public double GRABBERR_REST_POWER = 0.0;
     public double LAUNCHER_READY_POSITION = 0.0;
     public double LAUNCHER_SHOOT_POSITION = 0.5;
 
     // Motor Variables
-    public double SHOOTER_SHOOT_POWER = 1.0;
+    public double SHOOTER_SHOOT_POWER = 0.01;
+    public double SHOOTER_REST_POWER = 0.0;
     public double INTAKE_IN_POWER = 1.0;
+    public double INTAKE_REST_POWER = 0.0;
+    double shooterclip;
+
 
     @Override
     public void runOpMode() {
@@ -63,7 +69,7 @@ public class Tele_Test extends LinearOpMode {
         rb_drive.setDirection(DcMotor.Direction.FORWARD);
 
         // Servo Directions
-        Launcher.setDirection(Servo.Direction.FORWARD);
+        Launcher.setDirection(Servo.Direction.REVERSE);
 
         // Setting Zero Power Brake to the Motors
         lf_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -71,15 +77,13 @@ public class Tele_Test extends LinearOpMode {
         lb_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rb_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
         // Non Drive Motors Encoder Modes
-        Shooter.setDirection(DcMotor.Direction.FORWARD);           //Shooter motor reset
-        Shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);       //Shooter run using encoders
+        Shooter.setDirection(DcMotor.Direction.FORWARD);
+        Shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-        Intake.setDirection(DcMotor.Direction.FORWARD);           //Intake motor reset
-        Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);       //Intake run using encoders
+        Intake.setDirection(DcMotor.Direction.REVERSE);
+        Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Wait for start
@@ -88,12 +92,14 @@ public class Tele_Test extends LinearOpMode {
 
         while (opModeIsActive()) {
 
+            telemetry.addData("Launcher Position", Launcher.getPosition());
+            telemetry.update();
+
             // Defining variable for the motor's power
             double lfPower;
             double rfPower;
             double rbPower;
             double lbPower;
-
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
@@ -120,19 +126,23 @@ public class Tele_Test extends LinearOpMode {
 
             if (gamepad2.a) {
                 Launcher.setPosition(LAUNCHER_READY_POSITION);
-            }
-
-            if (gamepad2.right_bumper){
-                Intake.setPower(INTAKE_IN_POWER);
-                GrabberL.setPower(GRABBERL_IN_POWER);
-                GrabberR.setPower(GRABBERR_IN_POWER);
-            }
-
-            if (gamepad2.dpad_up) {
-                Shooter.setPower(SHOOTER_SHOOT_POWER);
+            } else if (gamepad2.b) {
                 Launcher.setPosition(LAUNCHER_SHOOT_POSITION);
             }
 
+            if (gamepad2.right_bumper) {
+                Intake.setPower(INTAKE_IN_POWER);
+                GrabberL.setPower(GRABBERL_IN_POWER);
+                GrabberR.setPower(GRABBERR_IN_POWER);
+            } else if (gamepad2.left_bumper) {
+                Intake.setPower(INTAKE_REST_POWER);
+                GrabberL.setPower(GRABBERL_REST_POWER);
+                GrabberR.setPower(GRABBERR_REST_POWER);
+            }
+
+            double shooterPower = -gamepad2.left_stick_y;
+            shooterclip = Range.clip(shooterPower, -0.3, 0.3);
+            Shooter.setPower(shooterclip);
         }
     }
 }
