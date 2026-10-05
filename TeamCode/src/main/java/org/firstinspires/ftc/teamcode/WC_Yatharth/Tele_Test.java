@@ -42,7 +42,7 @@ public class Tele_Test extends LinearOpMode {
     public double LAUNCHER_IN_POWER = 0.5;
     public double LAUNCHER_REST_POWER = 0.0;
     public boolean launchtimerstarted = false;
-    public double launchDuration = 4.0;
+    public double launchDuration = 10.0;
     public double servoPosition = 0.0;
 
     // Motor Variables
@@ -162,9 +162,9 @@ public class Tele_Test extends LinearOpMode {
                 GrabberR.setPower(GRABBERR_REST_POWER);
             }
 
-            if (gamepad2.y) {
-                Launcher.setPower(0.5);
-            }
+//            if (gamepad2.y) {
+//                Launcher.setPower(0.5);
+//            }
 
             //Shooter Motor control
             double shooterPower = -gamepad2.left_stick_y;
@@ -183,7 +183,7 @@ public class Tele_Test extends LinearOpMode {
 
             //Time bound CRServo for Launcher
 
-           /* if (!launchtimerstarted && gamepad2.a) {
+            if (!launchtimerstarted && gamepad2.a) {
                 Launcher.setPower(LAUNCHER_IN_POWER);
                 launchtimer.reset();
                 launchtimerstarted = true;
@@ -195,7 +195,7 @@ public class Tele_Test extends LinearOpMode {
 
             if (gamepad2.b) {
                 Launcher.setPower(LAUNCHER_REST_POWER);
-            }*/
+            }
         }
     }
 }
