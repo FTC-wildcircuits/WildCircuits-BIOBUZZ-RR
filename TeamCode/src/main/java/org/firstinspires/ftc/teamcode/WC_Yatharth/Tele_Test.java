@@ -39,10 +39,11 @@ public class Tele_Test extends LinearOpMode {
     public double GRABBERR_IN_POWER = 1.0;
     public double GRABBERL_REST_POWER = 0.0;
     public double GRABBERR_REST_POWER = 0.0;
-    public double LAUNCHER_IN_POWER = 0.5;
+    public double LAUNCHER_IN_POWER = 1.0;
     public double LAUNCHER_REST_POWER = 0.0;
     public boolean launchtimerstarted = false;
     public double launchDuration = 10.0;
+    double launcherclip;
     public double servoPosition = 0.0;
 
     // Motor Variables
@@ -75,12 +76,12 @@ public class Tele_Test extends LinearOpMode {
 
         Shooter = hardwareMap.get(DcMotor.class, "Shooter");
         Shooter.setDirection(DcMotor.Direction.FORWARD);
-        Shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //Shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         Intake.setDirection(DcMotor.Direction.REVERSE);
-        Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize the hardware map - Servos
@@ -162,13 +163,17 @@ public class Tele_Test extends LinearOpMode {
                 GrabberR.setPower(GRABBERR_REST_POWER);
             }
 
+            double launcherPower = gamepad2.right_stick_x;
+            launcherclip = Range.clip(launcherPower, 0.0, 1.0);
+            Launcher.setPower(launcherclip);
+
 //            if (gamepad2.y) {
 //                Launcher.setPower(0.5);
 //            }
 
             //Shooter Motor control
             double shooterPower = -gamepad2.left_stick_y;
-            shooterclip = Range.clip(shooterPower, -0.3, 0.3);
+            shooterclip = Range.clip(shooterPower, -0.5, 0.5);
             Shooter.setPower(shooterclip);
 
             //Emergency Stop Button (create one for all non-drive motors and servos)
