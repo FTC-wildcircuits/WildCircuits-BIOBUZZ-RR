@@ -163,9 +163,9 @@ public class Tele_Test extends LinearOpMode {
                 GrabberR.setPower(GRABBERR_REST_POWER);
             }
 
-            double launcherPower = gamepad2.right_stick_x;
-            launcherclip = Range.clip(launcherPower, 0.0, 1.0);
-            Launcher.setPower(launcherclip);
+//            double launcherPower = gamepad2.right_stick_x;
+//            launcherclip = Range.clip(launcherPower, 0.0, 1.0);
+//            Launcher.setPower(launcherclip);
 
 //            if (gamepad2.y) {
 //                Launcher.setPower(0.5);
@@ -188,18 +188,29 @@ public class Tele_Test extends LinearOpMode {
 
             //Time bound CRServo for Launcher
 
-            if (!launchtimerstarted && gamepad2.a) {
-                Launcher.setPower(LAUNCHER_IN_POWER);
-                launchtimer.reset();
-                launchtimerstarted = true;
-            }
-            if (launchtimerstarted && (launchtimer.seconds() >= launchDuration)) {
-                Launcher.setPower(LAUNCHER_IN_POWER);
-                launchtimerstarted = false;
-            }
-
-            if (gamepad2.b) {
-                Launcher.setPower(LAUNCHER_REST_POWER);
+//            if (!launchtimerstarted && gamepad2.a) {
+//                Launcher.setPower(LAUNCHER_IN_POWER);
+//                launchtimer.reset();
+//                launchtimerstarted = true;
+//            }
+//            if (launchtimerstarted && (launchtimer.seconds() >= launchDuration)) {
+//                Launcher.setPower(LAUNCHER_IN_POWER);
+//                launchtimerstarted = false;
+//            }
+//
+//            if (gamepad2.b) {
+//                Launcher.setPower(LAUNCHER_REST_POWER);
+//            }
+            // Check if the 'A' button on Gamepad 1 is pressed
+            if (gamepad2.a) {
+                // Keep spinning full speed forward while pressed
+                Launcher.setPower(1.0);
+            } else if (gamepad2.b) {
+                // Optional: Spin full speed backward if 'B' is pressed
+                Launcher.setPower(-1.0);
+            } else {
+                // Crucial: Stop the servo immediately when no button is pressed
+                Launcher.setPower(0.0);
             }
         }
     }
