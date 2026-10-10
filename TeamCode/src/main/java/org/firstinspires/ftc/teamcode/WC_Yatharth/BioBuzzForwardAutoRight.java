@@ -15,8 +15,9 @@ public class BioBuzzForwardAutoRight extends LinearOpMode {
     private double FORWARD_POWER = 0.25;
     private double REST_POWER = 0.0;
     private double LEFT_POWER = 0.25;
-    private int HALF_SECOND = 500;
+    private int ONE_SECOND = 1000;
     private int SEVEN_SECONDS = 7000;
+    private int HALF_SECOND = 500;
 
     @Override
     public void runOpMode() {
@@ -57,8 +58,8 @@ public class BioBuzzForwardAutoRight extends LinearOpMode {
             telemetry.addLine("Driving Forward!");
             telemetry.update();
 
-            // Drive for 1/2 a second
-            sleep(HALF_SECOND);
+            // Drive for a second
+            sleep(ONE_SECOND);
 
             // Strafe left at 25% power
             lf_drive.setPower(-LEFT_POWER);
@@ -66,11 +67,23 @@ public class BioBuzzForwardAutoRight extends LinearOpMode {
             lb_drive.setPower(LEFT_POWER);
             rb_drive.setPower(-LEFT_POWER);
 
-            telemetry.addLine("Strafing Right!");
+            telemetry.addLine("Strafing Left!");
             telemetry.update();
 
             // Strafe for 4 seconds
             sleep(SEVEN_SECONDS);
+
+            // Drive Back at 25% power
+            lf_drive.setPower(-LEFT_POWER);
+            rf_drive.setPower(-LEFT_POWER);
+            lb_drive.setPower(-LEFT_POWER);
+            rb_drive.setPower(-LEFT_POWER);
+
+            telemetry.addLine("Going Back!");
+            telemetry.update();
+
+            // Go Back for a half a second
+            sleep(HALF_SECOND);
 
             // Stop all drive motors
             lf_drive.setPower(REST_POWER);
