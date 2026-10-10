@@ -41,13 +41,14 @@ public class Tele_Test extends LinearOpMode {
     public double GRABBERR_REST_POWER = 0.0;
     public double LAUNCHER_IN_POWER = 1.0;
     public double LAUNCHER_REST_POWER = 0.0;
+    public double LAUNCHER_REVERSE_POWER = -1.0;
     public boolean launchtimerstarted = false;
     public double launchDuration = 10.0;
     double launcherclip;
     public double servoPosition = 0.0;
 
     // Motor Variables
-    public double SHOOTER_SHOOT_POWER = 0.1;
+    public double SHOOTER_SHOOT_POWER = 0.55;
     public double SHOOTER_REST_POWER = 0.0;
     public double INTAKE_IN_POWER = 1.0;
     public double INTAKE_REST_POWER = 0.0;
@@ -163,9 +164,9 @@ public class Tele_Test extends LinearOpMode {
                 GrabberR.setPower(GRABBERR_REST_POWER);
             }
 
-            double launcherPower = gamepad2.right_stick_x;
+          /*  double launcherPower = gamepad2.right_stick_x;
             launcherclip = Range.clip(launcherPower, 0.0, 1.0);
-            Launcher.setPower(launcherclip);
+            Launcher.setPower(launcherclip);*/
 
 //            if (gamepad2.y) {
 //                Launcher.setPower(0.5);
@@ -173,7 +174,7 @@ public class Tele_Test extends LinearOpMode {
 
             //Shooter Motor control
             double shooterPower = -gamepad2.left_stick_y;
-            shooterclip = Range.clip(shooterPower, -0.5, 0.5);
+            shooterclip = Range.clip(shooterPower, -0.55, 0.55);
             Shooter.setPower(shooterclip);
 
             //Emergency Stop Button (create one for all non-drive motors and servos)
@@ -186,9 +187,11 @@ public class Tele_Test extends LinearOpMode {
             }
 
 
+
+
             //Time bound CRServo for Launcher
 
-            if (!launchtimerstarted && gamepad2.a) {
+           /* if (!launchtimerstarted && gamepad2.a) {
                 Launcher.setPower(LAUNCHER_IN_POWER);
                 launchtimer.reset();
                 launchtimerstarted = true;
@@ -199,6 +202,13 @@ public class Tele_Test extends LinearOpMode {
             }
 
             if (gamepad2.b) {
+                Launcher.setPower(LAUNCHER_REST_POWER);
+            }*/
+            if (gamepad2.a) {
+                Launcher.setPower(LAUNCHER_IN_POWER);
+            } else if (gamepad2.b) {
+                Launcher.setPower(LAUNCHER_REVERSE_POWER);
+            } else {
                 Launcher.setPower(LAUNCHER_REST_POWER);
             }
         }
