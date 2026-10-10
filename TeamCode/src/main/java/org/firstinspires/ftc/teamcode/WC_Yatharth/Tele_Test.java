@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Tele-Test", group = "Linear OpMode")
+@TeleOp(name = "AA Oct10 Teleop")
 public class Tele_Test extends LinearOpMode {
 
     // Declare OpMode members and variables
