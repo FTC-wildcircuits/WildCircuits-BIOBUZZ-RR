@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode.WC_Yatharth;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Tele-Test", group = "Linear OpMode")
-public class Tele_Test extends LinearOpMode {
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+@TeleOp(name = "AA Oct10 Teleop")
+public class Tele_Yatharth extends LinearOpMode {
 
     // Declare OpMode members and variables
     private ElapsedTime runtime = new ElapsedTime();
@@ -29,6 +33,8 @@ public class Tele_Test extends LinearOpMode {
     private CRServo Launcher = null;
     private ElapsedTime launchtimer = new ElapsedTime();
 
+    private IMU robotImu = null;
+
 
     // Servo Variables
 
@@ -41,17 +47,21 @@ public class Tele_Test extends LinearOpMode {
     public double GRABBERR_REST_POWER = 0.0;
     public double LAUNCHER_IN_POWER = 1.0;
     public double LAUNCHER_REST_POWER = 0.0;
+    public double LAUNCHER_REVERSE_POWER = -1.0;
     public boolean launchtimerstarted = false;
     public double launchDuration = 10.0;
     double launcherclip;
     public double servoPosition = 0.0;
 
     // Motor Variables
-    public double SHOOTER_SHOOT_POWER = 0.1;
+    public double SHOOTER_SHOOT_POWER = 0.55;
     public double SHOOTER_REST_POWER = 0.0;
     public double INTAKE_IN_POWER = 1.0;
     public double INTAKE_REST_POWER = 0.0;
     double shooterclip;
+
+    // Drive Variables
+    public double STRAFE_CORRECTION = 1.1; // Counteract imperfect strafing, tune as needed
 
 
     @Override
@@ -94,17 +104,43 @@ public class Tele_Test extends LinearOpMode {
         Launcher = hardwareMap.get(CRServo.class, "Launcher");
         Launcher.setDirection(CRServo.Direction.FORWARD);
 
+        // Initialize the hardware map - IMU
+        // Make sure the two values are set depending on how the
+        // control hub is mounted on the robot
+        robotImu = hardwareMap.get(IMU.class, "imu");
+        IMU.Parameters imuParameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+                )
+        );
+        robotImu.initialize(imuParameters);
+
         // Non Drive Motors Encoder Modes and Directions
 
 
         // Wait for start
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
         waitForStart();
         runtime.reset();
 
-       // Launcher.setPosition(servoPosition);
+        // Launcher.setPosition(servoPosition);
 
         while (opModeIsActive()) {
 
+            // Let the driver reset the "forward" direction by pressing Options/Back.
+            // Do this while the robot is pointed the way you want to call "forward".
+            if (gamepad1.options) {
+                robotImu.resetYaw();
+            }
+
+            // Get the robot's current heading from the IMU.
+            double heading = robotImu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Heading (deg)", "%.1f", Math.toDegrees(heading));
             telemetry.addData("Launcher Power", Launcher.getPower());
             telemetry.update();
 
@@ -114,22 +150,29 @@ public class Tele_Test extends LinearOpMode {
             double rbPower;
             double lbPower;
 
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
+            // Field-centric drive: left stick moves the robot relative to the field,
+            // and right stick turns.
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
+
+            // Rotate the joystick's field-relative direction by the negative of the
+            // robot's heading, converting it into robot-relative x/y values.
+            double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
+            double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
+
+            rotX = rotX * STRAFE_CORRECTION;
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
 
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
-            lfPower = (y + x + rx) / denominator;
-            lbPower = (y - x + rx) / denominator;
-            rfPower = (y - x - rx) / denominator;
-            rbPower = (y + x - rx) / denominator;
+            lfPower = (rotY + rotX + rx) / denominator;
+            lbPower = (rotY - rotX + rx) / denominator;
+            rfPower = (rotY - rotX - rx) / denominator;
+            rbPower = (rotY + rotX - rx) / denominator;
 
             // Setting all the drive motors to their power
             lf_drive.setPower(lfPower);
@@ -173,7 +216,7 @@ public class Tele_Test extends LinearOpMode {
 
             //Shooter Motor control
             double shooterPower = -gamepad2.left_stick_y;
-            shooterclip = Range.clip(shooterPower, -0.5, 0.5);
+            shooterclip = Range.clip(shooterPower, -0.55, 0.55);
             Shooter.setPower(shooterclip);
 
             //Emergency Stop Button (create one for all non-drive motors and servos)
@@ -186,34 +229,18 @@ public class Tele_Test extends LinearOpMode {
             }
 
 
+
+
             //Time bound CRServo for Launcher
 
-//            if (!launchtimerstarted && gamepad2.a) {
-//                Launcher.setPower(LAUNCHER_IN_POWER);
-//                launchtimer.reset();
-//                launchtimerstarted = true;
-//            }
-//            if (launchtimerstarted && (launchtimer.seconds() >= launchDuration)) {
-//                Launcher.setPower(LAUNCHER_IN_POWER);
-//                launchtimerstarted = false;
-//            }
-//
-//            if (gamepad2.b) {
-//                Launcher.setPower(LAUNCHER_REST_POWER);
-//            }
-            // Check if the 'A' button on Gamepad 1 is pressed
             if (gamepad2.a) {
-                // Keep spinning full speed forward while pressed
-                Launcher.setPower(1.0);
+                Launcher.setPower(LAUNCHER_IN_POWER);
             } else if (gamepad2.b) {
-                // Optional: Spin full speed backward if 'B' is pressed
-                Launcher.setPower(-1.0);
+                Launcher.setPower(LAUNCHER_REVERSE_POWER);
             } else {
-                // Crucial: Stop the servo immediately when no button is pressed
-                Launcher.setPower(0.0);
+                Launcher.setPower(LAUNCHER_REST_POWER);
+            }
             }
         }
     }
 }
-
-
