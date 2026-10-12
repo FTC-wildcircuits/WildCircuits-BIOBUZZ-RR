@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "AA Oct10 Teleop")
-public class Tele_Test extends LinearOpMode {
+public class Tele_Yatharth extends LinearOpMode {
 
     // Declare OpMode members and variables
     private ElapsedTime runtime = new ElapsedTime();
