@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -54,8 +55,8 @@ public class FSM_Tele_Yatharth extends OpMode {
     DcMotor Shooter = null;
     DcMotor Intake = null;
 
-    CRServo GrabberL = null;
-    CRServo GrabberR = null;
+//    CRServo GrabberL = null;
+//    CRServo GrabberR = null;
 
     CRServo Launcher = null;
     ElapsedTime launchtimer = new ElapsedTime();
@@ -73,20 +74,20 @@ public class FSM_Tele_Yatharth extends OpMode {
     public final double MIN_POSITION = 0.0;
     public final double MAX_POSITION = 1.0;
     public double positionAdjustment = 0.01;
-    public double GRABBERL_IN_POWER = 1.0;
-    public double GRABBERR_IN_POWER = 1.0;
-    public double GRABBERL_REST_POWER = 0.0;
-    public double GRABBERR_REST_POWER = 0.0;
-    public double GRABBERL_REVERSE_POWER = -1.0;
-    public double GRABBERR_REVERSE_POWER = -1.0;
-    public double LAUNCHER_IN_POWER = 1.0;
+//    public double GRABBERL_IN_POWER = 1.0;
+//    public double GRABBERR_IN_POWER = 1.0;
+//    public double GRABBERL_REST_POWER = 0.0;
+//    public double GRABBERR_REST_POWER = 0.0;
+//    public double GRABBERL_REVERSE_POWER = -1.0;
+//    public double GRABBERR_REVERSE_POWER = -1.0;
+    public double LAUNCHER_IN_POWER = 0.2;
     public double LAUNCHER_REST_POWER = 0.0;
-    public double LAUNCHER_REVERSE_POWER = -1.0;
+    public double LAUNCHER_REVERSE_POWER = -0.2;
     public boolean launchtimerstarted = false;
 
     // Timer Variables
     public double launchDuration = 10.0;
-    public int CRGrabberTimer = 120;
+    //public int CRGrabberTimer = 120;
     public int CRLauncherTimer = 120;
     public int IntakeMotorTimer = 120;
     public int ShooterMotorTimer = 120;
@@ -94,9 +95,9 @@ public class FSM_Tele_Yatharth extends OpMode {
     public double servoPosition = 0.0;
 
     // Motor Variablesn
-    public double SHOOTER_SHOOT_POWER = 0.55;
+    public double SHOOTER_SHOOT_POWER = 0.475;
     public double SHOOTER_REST_POWER = 0.0;
-    public double SHOOTER_REVERSE_POWER = -0.55;
+    public double SHOOTER_REVERSE_POWER = -0.475;
     public double INTAKE_IN_POWER = 1.0;
     public double INTAKE_SHOOT_POWER = 1.0;
     public double INTAKE_REST_POWER = 0.0;
@@ -146,11 +147,11 @@ public class FSM_Tele_Yatharth extends OpMode {
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize the hardware map - Servos
-        GrabberL = hardwareMap.get(CRServo.class, "GrabberL");
-        GrabberL.setDirection(CRServo.Direction.FORWARD);
-
-        GrabberR = hardwareMap.get(CRServo.class, "GrabberR");
-        GrabberR.setDirection(CRServo.Direction.REVERSE);
+//        GrabberL = hardwareMap.get(CRServo.class, "GrabberL");
+//        GrabberL.setDirection(CRServo.Direction.FORWARD);
+//
+//        GrabberR = hardwareMap.get(CRServo.class, "GrabberR");
+//        GrabberR.setDirection(CRServo.Direction.REVERSE);
 
         Launcher = hardwareMap.get(CRServo.class, "Launcher");
         Launcher.setDirection(CRServo.Direction.REVERSE);
@@ -172,8 +173,8 @@ public class FSM_Tele_Yatharth extends OpMode {
         telemetry.addData("Current Pose", currentpose.heading);
         telemetry.addData("Shooter Power", Shooter.getPower());
         telemetry.addData("Intake Power", Intake.getPower());
-        telemetry.addData("GrabberL Power", GrabberR.getPower());
-        telemetry.addData("GrabberR Power", GrabberR.getPower());
+//        telemetry.addData("GrabberL Power", GrabberR.getPower());
+//        telemetry.addData("GrabberR Power", GrabberR.getPower());
         telemetry.addData("Launcher Power", Launcher.getPower());
        // telemetry.addData("Voltage", v);
         telemetry.update();
@@ -207,14 +208,11 @@ public class FSM_Tele_Yatharth extends OpMode {
                 Shooter.setPower(SHOOTER_REST_POWER);
                 Launcher.setPower(LAUNCHER_REST_POWER);
                 Actions.runBlocking(new ParallelAction(
-                        new CRServo_Action_Continuous(GrabberR, GRABBERR_IN_POWER),
-                        new CRServo_Action_Continuous(GrabberL, GRABBERL_IN_POWER),
+//                        new CRServo_Action_Continuous(GrabberR, GRABBERR_IN_POWER),
+//                        new CRServo_Action_Continuous(GrabberL, GRABBERL_IN_POWER),
                         new MotorActionContinuous(Intake, INTAKE_IN_POWER)
 
                 ));
-               /* Intake.setPower(INTAKE_REST_POWER);
-                GrabberR.setPower(GRABBERR_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);*/
                 telemetry.update();
                 CurrentState = LiftState.RegTele;
                 break;
@@ -222,27 +220,26 @@ public class FSM_Tele_Yatharth extends OpMode {
             case OutTake:
                 move();
                 Actions.runBlocking(new ParallelAction(
-                        new CRServo_Action_Continuous(GrabberR, GRABBERR_REVERSE_POWER),
-                        new CRServo_Action_Continuous(GrabberL, GRABBERL_REVERSE_POWER),
+//                        new CRServo_Action_Continuous(GrabberR, GRABBERR_REVERSE_POWER),
+//                        new CRServo_Action_Continuous(GrabberL, GRABBERL_REVERSE_POWER),
                         new MotorActionContinuous(Intake, INTAKE_REVERSE_POWER)
                 ));
                 telemetry.update();
-                /*Intake.setPower(INTAKE_REST_POWER);
-                GrabberR.setPower(GRABBERR_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);*/
                 CurrentState = LiftState.RegTele;
                 break;
 
             case HiveShoot:
                 move();
-                GrabberR.setPower(GRABBERR_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);
+//                GrabberR.setPower(GRABBERR_REST_POWER);
+//                GrabberL.setPower(GRABBERL_REST_POWER);
                // v = hardwareMap.voltageSensor.iterator().next().getVoltage();
-                Actions.runBlocking(new ParallelAction(
-                        new CRServo_Action_Continuous(Launcher, LAUNCHER_IN_POWER),
+                Actions.runBlocking(new SequentialAction(
                         new MotorActionContinuous(Shooter, SHOOTER_SHOOT_POWER),
+                        new SleepAction(1),
+                        new ParallelAction(
+                        new CRServo_Action_Continuous(Launcher, LAUNCHER_IN_POWER),
                         new MotorActionContinuous(Intake, INTAKE_SHOOT_POWER)
-                ));
+                )));
                 /*Shooter.setPower(SHOOTER_REST_POWER);
                 Intake.setPower(INTAKE_REST_POWER);
                 Launcher.setPower(LAUNCHER_REST_POWER);*/
@@ -252,11 +249,12 @@ public class FSM_Tele_Yatharth extends OpMode {
 
             case Transfer:
                 move();
-                GrabberR.setPower(GRABBERR_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);
+//                GrabberR.setPower(GRABBERR_REST_POWER);
+//                GrabberL.setPower(GRABBERL_REST_POWER);
                 Actions.runBlocking(new ParallelAction(
                         new CRServo_Action_Continuous(Launcher, LAUNCHER_IN_POWER),
-                        new MotorActionContinuous(Intake, INTAKE_IN_POWER)
+                        new MotorActionContinuous(Intake, INTAKE_IN_POWER),
+                        new MotorActionContinuous(Shooter, SHOOTER_SHOOT_POWER)
                 ));
                 /*Intake.setPower(INTAKE_REST_POWER);
                 Launcher.setPower(LAUNCHER_REST_POWER);*/
@@ -266,11 +264,12 @@ public class FSM_Tele_Yatharth extends OpMode {
 
             case RTransfer:
                 move();
-                GrabberR.setPower(GRABBERR_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);
+//                GrabberR.setPower(GRABBERR_REST_POWER);
+//                GrabberL.setPower(GRABBERL_REST_POWER);
                 Actions.runBlocking(new SequentialAction(
                         new CRServo_Action_Continuous(Launcher, LAUNCHER_REVERSE_POWER),
-                        new MotorActionContinuous(Intake, INTAKE_IN_POWER)
+                        new MotorActionContinuous(Intake, INTAKE_IN_POWER),
+                        new MotorActionContinuous(Shooter, SHOOTER_SHOOT_POWER)
                 ));
                /* Intake.setPower(INTAKE_REST_POWER);
                 Launcher.setPower(LAUNCHER_REST_POWER);*/
@@ -289,8 +288,8 @@ public class FSM_Tele_Yatharth extends OpMode {
                 Intake.setPower(INTAKE_REST_POWER);
 
                 Launcher.setPower(LAUNCHER_REST_POWER);
-                GrabberL.setPower(GRABBERL_REST_POWER);
-                GrabberR.setPower(GRABBERR_REST_POWER);
+//                GrabberL.setPower(GRABBERL_REST_POWER);
+//                GrabberR.setPower(GRABBERR_REST_POWER);
                 EmergencyStop = true;
 
                 if (gamepad2.dpad_left) {
@@ -303,8 +302,8 @@ public class FSM_Tele_Yatharth extends OpMode {
             case Begin:
                 move();
                 Actions.runBlocking(new ParallelAction(
-                        new CRServo_Action_Continuous(GrabberR, GRABBERR_IN_POWER),
-                        new CRServo_Action_Continuous(GrabberL, GRABBERL_IN_POWER),
+//                        new CRServo_Action_Continuous(GrabberR, GRABBERR_IN_POWER),
+//                        new CRServo_Action_Continuous(GrabberL, GRABBERL_IN_POWER),
                         new MotorActionContinuous(Intake, INTAKE_IN_POWER)
                 ));
                /* Intake.setPower(INTAKE_REST_POWER);
@@ -333,7 +332,7 @@ public class FSM_Tele_Yatharth extends OpMode {
     public void TeleOperations() {
 
         //Intake Motor and Grabber control
-        if (gamepad1.right_bumper) {
+       /* if (gamepad1.right_bumper) {
             Intake.setPower(INTAKE_IN_POWER);
             GrabberL.setPower(GRABBERL_IN_POWER);
             GrabberR.setPower(GRABBERR_IN_POWER);
@@ -341,7 +340,7 @@ public class FSM_Tele_Yatharth extends OpMode {
             Intake.setPower(INTAKE_REST_POWER);
             GrabberL.setPower(GRABBERL_REST_POWER);
             GrabberR.setPower(GRABBERR_REST_POWER);
-        }
+        }*/
         //Shooter Motor control
       /*  double shooterPower = -gamepad2.left_stick_y;
         shooterclip = Range.clip(shooterPower, -SHOOTER_SHOOT_POWER, SHOOTER_SHOOT_POWER);

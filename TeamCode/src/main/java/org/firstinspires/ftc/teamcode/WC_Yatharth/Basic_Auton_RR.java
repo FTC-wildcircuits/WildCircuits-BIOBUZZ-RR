@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -30,8 +31,8 @@ public class Basic_Auton_RR extends LinearOpMode {
     DcMotor Shooter = null;
     DcMotor Intake = null;
 
-    CRServo GrabberL = null;
-    CRServo GrabberR = null;
+//    CRServo GrabberL = null;
+//    CRServo GrabberR = null;
 
     CRServo Launcher = null;
    // ElapsedTime launchtimer = new ElapsedTime();
@@ -49,22 +50,22 @@ public class Basic_Auton_RR extends LinearOpMode {
     public double GRABBERR_REST_POWER = 0.0;
     public double GRABBERL_REVERSE_POWER = -1.0;
     public double GRABBERR_REVERSE_POWER = -1.0;
-    public double LAUNCHER_IN_POWER = 1.0;
+    public double LAUNCHER_IN_POWER = 0.2;
     public double LAUNCHER_REST_POWER = 0.0;
     public double LAUNCHER_REVERSE_POWER = -1.0;
     public boolean launchtimerstarted = false;
 
     // Timer Variables
     public double launchDuration = 10.0;
-    public int CRGrabberTimer = 120;
-    public int CRLauncherTimer = 120;
+    public int CRGrabberTimer = 10;
+    public int CRLauncherTimer = 10;
     public int IntakeMotorTimer = 10;
-    public int ShooterMotorTimer = 120;
+    public int ShooterMotorTimer = 10;
     double launcherclip;
     public double servoPosition = 0.0;
 
     // Motor Variables
-    public double SHOOTER_SHOOT_POWER = 0.35;
+    public double SHOOTER_SHOOT_POWER = 0.475;
     public double SHOOTER_REST_POWER = 0.0;
     public double SHOOTER_REVERSE_POWER = -0.35;
     public double INTAKE_IN_POWER = 1.0;
@@ -97,11 +98,11 @@ public class Basic_Auton_RR extends LinearOpMode {
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize the hardware map - Servos
-        GrabberL = hardwareMap.get(CRServo.class, "GrabberL");
-        GrabberL.setDirection(CRServo.Direction.FORWARD);
-
-        GrabberR = hardwareMap.get(CRServo.class, "GrabberR");
-        GrabberR.setDirection(CRServo.Direction.FORWARD);
+//        GrabberL = hardwareMap.get(CRServo.class, "GrabberL");
+//        GrabberL.setDirection(CRServo.Direction.FORWARD);
+//
+//        GrabberR = hardwareMap.get(CRServo.class, "GrabberR");
+//        GrabberR.setDirection(CRServo.Direction.FORWARD);
 
         Launcher = hardwareMap.get(CRServo.class, "Launcher");
         Launcher.setDirection(CRServo.Direction.FORWARD);
@@ -115,12 +116,24 @@ public class Basic_Auton_RR extends LinearOpMode {
         if (isStopRequested()) return;
 
         Actions.runBlocking(
-                new ParallelAction(
+                new SequentialAction(
                         drive.actionBuilder(new Pose2d(0,0,0))
-                                .strafeToLinearHeading(new Vector2d(20,-20), Math.toRadians(180))
+                                .strafeTo(new Vector2d(10,10))
+                                .strafeTo(new Vector2d(130,0))
                                 .build(),
-                        new MotorActionTimeBase(Intake, IntakeMotorTimer, INTAKE_IN_POWER)
-                )
+                        new MotorActionTimeBase(Shooter, ShooterMotorTimer, SHOOTER_SHOOT_POWER),
+                        new SleepAction(1),
+                        new ParallelAction(
+                                new MotorActionTimeBase(Intake, IntakeMotorTimer, INTAKE_IN_POWER),
+                                new CRServo_Action(Launcher,LAUNCHER_IN_POWER, CRLauncherTimer
+                        ),
+                        drive.actionBuilder(new Pose2d(130,0,0))
+                                .strafeTo(new Vector2d(115,-30))
+                                .strafeTo(new Vector2d(16,-50))
+                                .build()
+                        )
+
+                 )
         );
 
     }
@@ -238,18 +251,19 @@ public class Basic_Auton_RR extends LinearOpMode {
         DcMotor motor;
         double time;
         double power;
-        ElapsedTime timer;
+        ElapsedTime timer = null;
 
         public MotorActionTimeBase(DcMotor mot, double sec, double pow) {
             this.motor = mot;
             this.time = sec;
             this.power = pow;
         }
-
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if (timer.seconds() < time) {
+            if (timer == null)  {
                 timer = new ElapsedTime();
                 motor.setPower(power);
+            }
+            if (timer.seconds() < time) {
                 return true;
             } else {
                 motor.setPower(0);
@@ -259,7 +273,7 @@ public class Basic_Auton_RR extends LinearOpMode {
     }
 
     // CRServo Action build for roadrunner to use
-    public class CRServo_Action implements Action {
+    public static class CRServo_Action implements Action {
         CRServo crServo;
         double power;
         int seconds;
@@ -273,11 +287,17 @@ public class Basic_Auton_RR extends LinearOpMode {
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if (timer.seconds() < seconds) {
+            if (timer == null) {
                 timer = new ElapsedTime();
                 crServo.setPower(power);
             }
-            return false;
+
+            if (timer.seconds() < seconds) {
+                return true;
+            } else {
+                crServo.setPower(0);
+                return false;
+            }
         }
     }
 
