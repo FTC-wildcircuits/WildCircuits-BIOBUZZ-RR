@@ -10,10 +10,12 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -34,9 +36,7 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
 //    CRServo GrabberR = null;
 
     CRServo Launcher = null;
-   // ElapsedTime launchtimer = new ElapsedTime();
-   // HuskyLens camera = null;
-
+  //  private HuskyLens huskyLens = null;
 
     // Servo Variables
 
@@ -49,7 +49,7 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
     public double GRABBERR_REST_POWER = 0.0;
     public double GRABBERL_REVERSE_POWER = -1.0;
     public double GRABBERR_REVERSE_POWER = -1.0;
-    public double LAUNCHER_IN_POWER = 0.2;
+    public double LAUNCHER_IN_POWER = 1.0;
     public double LAUNCHER_REST_POWER = 0.0;
     public double LAUNCHER_REVERSE_POWER = -1.0;
     public boolean launchtimerstarted = false;
@@ -57,16 +57,16 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
     // Timer Variables
     public double launchDuration = 10.0;
     public int CRGrabberTimer = 10;
-    public int CRLauncherTimer = 15;
-    public int IntakeMotorTimer = 15;
-    public int ShooterMotorTimer = 15;
+    public int CRLauncherTimer = 10;
+    public int IntakeMotorTimer = 10;
+    public int ShooterMotorTimer = 10;
     double launcherclip;
     public double servoPosition = 0.0;
 
     // Motor Variables
-    public double SHOOTER_SHOOT_POWER = 0.475;
+    public double SHOOTER_SHOOT_POWER = 0.55;
     public double SHOOTER_REST_POWER = 0.0;
-    public double SHOOTER_REVERSE_POWER = -0.35;
+    public double SHOOTER_REVERSE_POWER = -0.55;
     public double INTAKE_IN_POWER = 1.0;
     public double INTAKE_REST_POWER = 0.0;
     public double INTAKE_REVERSE_POWER = -1.0;
@@ -92,7 +92,7 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
         Shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Intake = hardwareMap.get(DcMotor.class, "Intake");
-        Intake.setDirection(DcMotor.Direction.REVERSE);
+        Intake.setDirection(DcMotor.Direction.FORWARD);
         //Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -104,9 +104,23 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
 //        GrabberR.setDirection(CRServo.Direction.FORWARD);
 
         Launcher = hardwareMap.get(CRServo.class, "Launcher");
-        Launcher.setDirection(CRServo.Direction.FORWARD);
+        Launcher.setDirection(CRServo.Direction.REVERSE);
 
-       // camera = hardwareMap.get(HuskyLens.class, "HuskyLens");
+        // Initialize the HuskyLens and check communication
+      /*  huskyLens = hardwareMap.get(HuskyLens.class, "HuskyLens");
+        if (!huskyLens.knock()) {
+            telemetry.addData(">>", "Problem communicating with HuskyLens!");
+        } else {
+            telemetry.addData(">>", "HuskyLens Initialized Successfully!");
+        }
+
+        // Set HuskyLens algorithm (Change to COLOR_RECOGNITION if using color blobs)
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);*/
+
+
+
+
+        //telemetry.addData("Current Pose", currentpose.heading);
 
         runtime.reset();
 
@@ -116,34 +130,44 @@ public class TipSideUp_Auton_RR extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
+                        //Move to the shooting position
                         drive.actionBuilder(new Pose2d(0,0,Math.toRadians(0)))
                                 .lineToX(-6)
                                 .build(),
-                        new SequentialAction(
-                                new MotorActionTimeBase(Shooter, ShooterMotorTimer,SHOOTER_SHOOT_POWER),
-                                new SleepAction(pause),
-                                new ParallelAction(
-                                        new CRServo_Action(Launcher, LAUNCHER_IN_POWER, CRLauncherTimer),
-                                        new MotorActionTimeBase(Intake,IntakeMotorTimer,INTAKE_IN_POWER)
-                                )
-                        ),
+
+                        // Start the shooter first
+                        new MotorActionContinuous(Shooter,SHOOTER_SHOOT_POWER),
                         new SleepAction(pause),
+
+                        //Start Launcher and Intake in parallel and run for 10sec
                         new ParallelAction(
-                                new MotorActionTimeBase(Intake,IntakeMotorTimer,INTAKE_IN_POWER),
-                                drive.actionBuilder(new Pose2d(-6,0,Math.toRadians(0)))
-                                        .strafeToLinearHeading(new Vector2d(-2,-60), Math.toRadians(270))
-                                        //.lineToY(-32)
-                                        .build()
+                                new CRServo_Action_Continuous(Launcher, LAUNCHER_IN_POWER),
+                                new MotorActionContinuous(Intake,INTAKE_IN_POWER)
                         ),
-                       // new SleepAction(pause),
-                        drive.actionBuilder(new Pose2d(-2,-60,Math.toRadians(270)))
+                        new SleepAction(ShooterMotorTimer),
+
+                        //Shut down shooter and launcher but let intake run
+                        new ParallelAction(
+                                new MotorActionContinuous(Shooter,SHOOTER_REST_POWER),
+                                new CRServo_Action_Continuous(Launcher, LAUNCHER_REST_POWER),
+                                new MotorActionContinuous(Intake,INTAKE_REST_POWER)
+                        ),
+
+                        //Drive to garden for Intake
+                        /*drive.actionBuilder(new Pose2d(-6,0,Math.toRadians(0)))
+                                .strafeToLinearHeading(new Vector2d(-2,-60), Math.toRadians(270))
+                                .build(),*/
+
+                        //Drive to Parking
+                        drive.actionBuilder(new Pose2d(-6,0,Math.toRadians(0)))
                                 .strafeToLinearHeading(new Vector2d(-10,-24), Math.toRadians(0))
                                 .strafeTo(new Vector2d(-110, -50))
                                 .build()
 
+                        //Shut down Intake
+                        //new MotorActionContinuous(Intake,INTAKE_REST_POWER)
                 )
         );
-
     }
 
     // Servo action build for roadrunner to use

@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-@Autonomous(name = "Basic RR Autonomous")
+//@Autonomous(name = "Basic RR Autonomous")
 public class Basic_Auton_RR extends LinearOpMode {
 
     // Time into the Autonomous round

@@ -80,9 +80,9 @@ public class FSM_Tele_Yatharth extends OpMode {
 //    public double GRABBERR_REST_POWER = 0.0;
 //    public double GRABBERL_REVERSE_POWER = -1.0;
 //    public double GRABBERR_REVERSE_POWER = -1.0;
-    public double LAUNCHER_IN_POWER = 0.2;
+    public double LAUNCHER_IN_POWER = 1.0;
     public double LAUNCHER_REST_POWER = 0.0;
-    public double LAUNCHER_REVERSE_POWER = -0.2;
+    public double LAUNCHER_REVERSE_POWER = -1.0;
     public boolean launchtimerstarted = false;
 
     // Timer Variables
@@ -95,16 +95,16 @@ public class FSM_Tele_Yatharth extends OpMode {
     public double servoPosition = 0.0;
 
     // Motor Variablesn
-    public double SHOOTER_SHOOT_POWER = 0.475;
+    public double SHOOTER_SHOOT_POWER = 0.55;
     public double SHOOTER_REST_POWER = 0.0;
-    public double SHOOTER_REVERSE_POWER = -0.475;
+    public double SHOOTER_REVERSE_POWER = -0.55;
     public double INTAKE_IN_POWER = 1.0;
     public double INTAKE_SHOOT_POWER = 1.0;
     public double INTAKE_REST_POWER = 0.0;
     public double INTAKE_REVERSE_POWER = -1.0;
     public double DRIVEMOTOR_POWER_ZERO = 0.0;
     double shooterclip;
-   // double v;
+   // double v
 
     // Wait Variables
     public static double action_wait = 0.1;
@@ -142,7 +142,7 @@ public class FSM_Tele_Yatharth extends OpMode {
         Shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Intake = hardwareMap.get(DcMotor.class, "Intake");
-        Intake.setDirection(DcMotor.Direction.REVERSE);
+        Intake.setDirection(DcMotor.Direction.FORWARD);
         //Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

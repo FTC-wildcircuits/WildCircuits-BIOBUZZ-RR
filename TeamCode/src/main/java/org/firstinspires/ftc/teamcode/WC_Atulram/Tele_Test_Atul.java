@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "AA Oct10 Teleop")
+//@TeleOp(name = "AA Oct10 Teleop")
 public class Tele_Test_Atul extends LinearOpMode {
 
     // Declare OpMode members and variables

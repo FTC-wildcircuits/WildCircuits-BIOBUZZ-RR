@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Config
-@TeleOp(name= "Encoder tick test")
+//@TeleOp(name= "Encoder tick test")
 public class EncoderTest extends LinearOpMode {
     public static int testPos = 0; // edit in dash
     public static double kP_O = 0.01;
