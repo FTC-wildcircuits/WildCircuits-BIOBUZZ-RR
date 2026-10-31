@@ -1,5 +1,3 @@
-<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/WC_Yatharth/Tele_Test.java
-=======
 package org.firstinspires.ftc.teamcode.WC_Yatharth;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
