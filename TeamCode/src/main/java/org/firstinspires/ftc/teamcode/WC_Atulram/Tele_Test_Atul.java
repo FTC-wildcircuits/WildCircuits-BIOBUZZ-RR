@@ -1,20 +1,18 @@
-package org.firstinspires.ftc.teamcode.WC_Yatharth;
+package org.firstinspires.ftc.teamcode.WC_Atulram;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "AA Oct10 Teleop")
-public class Tele_Test extends LinearOpMode {
+public class Tele_Test_Atul extends LinearOpMode {
 
     // Declare OpMode members and variables
     private ElapsedTime runtime = new ElapsedTime();
@@ -110,7 +108,7 @@ public class Tele_Test extends LinearOpMode {
         robotImu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters imuParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         );
