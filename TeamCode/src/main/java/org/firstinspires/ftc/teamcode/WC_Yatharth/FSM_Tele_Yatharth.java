@@ -546,7 +546,7 @@ public class FSM_Tele_Yatharth extends OpMode {
             this.power = pow;
         }
 
-        @Override
+        @Override   
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             if (!initialized) {
                 motor.setPower(power);
